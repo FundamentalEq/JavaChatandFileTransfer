@@ -4,11 +4,13 @@ public class listner implements Runnable
 {
     private Socket clientsocket ;
     private DataInputStream istream ;
-    public listner(Socket _clientsocket, String name)
+    private mex flag ;
+    public listner(Socket _clientsocket, String name, mex _flag)
     {
         try
         {
             clientsocket = _clientsocket ;
+            flag = _flag ;
             istream = new DataInputStream(clientsocket.getInputStream());
         }
         catch (UnknownHostException e)
@@ -22,6 +24,7 @@ public class listner implements Runnable
     }
     void recieveFileTcp(String path)
     {
+        flag.book() ;
         // recieve the length of the file
         long remaining = 0 ;
         try
@@ -36,12 +39,12 @@ public class listner implements Runnable
 
         // recieve the actual file
         FileOutputStream fostream = null ;
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[1024];
         try
         {
             fostream = new FileOutputStream(path);
             int read = 0 ;
-            while((read = istream.read(buffer, 0, (int)Math.min(buffer.length, remaining))) > 0)
+            while(remaining >0 && (read = istream.read(buffer, 0, (int)Math.min(buffer.length, remaining)))!=-1)
             {
                 remaining -= read;
                 fostream.write(buffer, 0, read) ;
@@ -60,6 +63,7 @@ public class listner implements Runnable
            System.err.println("Couldn't write to the file " + path) ;
        }
        System.out.println("recieve of file is now complete") ;
+       flag.unbook() ;
     }
     public void run()
     {
@@ -70,7 +74,7 @@ public class listner implements Runnable
             {
                 if((responseLine = istream.readUTF()) != null)
                 {
-                    if(responseLine.isEmpty()) continue ;
+                    // if(responseLine.isEmpty()) continue ;
                     System.out.println(responseLine);
                     System.out.flush() ;
                     if(responseLine == "quit") break ;

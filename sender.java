@@ -5,11 +5,13 @@ public class sender implements Runnable
     private Socket clientsocket ;
     private DataOutputStream ostream ;
     private BufferedReader keyRead ;
-    public sender(Socket _clientsocket, String name)
+    private mex flag ;
+    public sender(Socket _clientsocket, String name,mex _flag)
     {
         try
         {
             clientsocket = _clientsocket ;
+            flag = _flag ;
             ostream = new DataOutputStream(clientsocket.getOutputStream());
             keyRead = new BufferedReader(new InputStreamReader(System.in));
         }
@@ -25,6 +27,7 @@ public class sender implements Runnable
 
     void sendFileTcp(String path)
     {
+        flag.book() ;
         System.out.println("Sending file : " + path) ;
         FileInputStream fistream = null ;
         byte[] buffer = new byte[4096];
@@ -57,6 +60,7 @@ public class sender implements Runnable
         {
             System.err.println("Couldn't open the file" + path) ;
         }
+        flag.unbook() ;
     }
     public void run()
     {
@@ -70,6 +74,7 @@ public class sender implements Runnable
                 if(inputline != null && !inputline.isEmpty())
                 {
                     ostream.writeUTF(inputline);
+                    System.out.println("just wrote " + inputline) ;
                     ostream.flush();
                     if(inputline.indexOf("Sending") != -1)
                     {
