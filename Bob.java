@@ -20,6 +20,33 @@ class listner implements Runnable
         }
         new Thread(this,"bob_listener").start() ;
     }
+    void recieveFileTcp(String path,int remaining)
+    {
+        FileOutputStream fostream = null ;
+        byte[] buffer = new byte[4096];
+        try
+        {
+            fostream = new FileOutputStream(path);
+            int read = 0 ;
+            while((read = istream.read(buffer, 0, Math.min(buffer.length, remaining))) > 0)
+            {
+                remaining -= read;
+                fostream.write(buffer, 0, read) ;
+            }
+        }
+        catch (IOException e)
+       {
+           System.err.println("Couldn't write to the file " + path) ;
+       }
+       try
+       {
+           fostream.close() ;
+       }
+       catch(IOException e)
+       {
+           System.err.println("Couldn't write to the file " + path) ;
+       }
+    }
     public void run()
     {
         String responseLine ;
@@ -69,6 +96,32 @@ class sender implements Runnable
         }
         new Thread(this,"bob_sender").start() ;
     }
+    void sendFileTcp(String path)
+    {
+        FileInputStream fistream = null ;
+        byte[] buffer = new byte[4096];
+        try
+        {
+            fistream = new FileInputStream(path);
+            while (fistream.read(buffer) > 0)
+            {
+                ostream.write(buffer) ;
+                ostream.flush() ;
+            }
+        }
+        catch(IOException e)
+        {
+            System.err.println("Couldn't open the file" + path) ;
+        }
+        try
+        {
+            fistream.close() ;
+        }
+        catch(IOException e)
+        {
+            System.err.println("Couldn't open the file" + path) ;
+        }
+    }
     public void run()
     {
         String inputline ;
@@ -80,11 +133,13 @@ class sender implements Runnable
                 if(inputline == "break") break ;
                 if(inputline != null && !inputline.isEmpty())
                 {
-                    System.out.println(inputline) ;
+                    // if(inputline.indexOf("Sending") != -1)
+                    // {
+                    //
+                    // }
                     ostream.writeUTF(inputline);
                     ostream.flush();
                 }
-                System.out.println("here") ;
             }
             ostream.close() ;
         }
