@@ -28,10 +28,20 @@ public class sender implements Runnable
         }
         new Thread(this,name).start() ;
     }
+    String bar(long total, long done)
+    {
+        int p = (int)((done * 10) / total) ;
+        String ans = "" ;
+        for(int i = 1; i <= p ; ++i) ans = ans + "=" ;
+        ans += ">" ;
+        for(int i = p+1 ; i <= 10 ; ++i) ans += "_" ;
+        ans += "\r" ;
+        return ans ;
+    }
     void sendFileUdp(String path)
     {
         flag.book() ;
-        System.out.println("Sending file : " + path) ;
+        // System.out.println("Sending file : " + path) ;
         FileInputStream fistream = null ;
         byte[] buffer = new byte[2048] ;
         try
@@ -42,12 +52,15 @@ public class sender implements Runnable
             long filesz = fistream.getChannel().size() ;
             ostream.writeLong(filesz) ;
             ostream.flush() ;
-            System.out.println("File sz = " + filesz) ;
+            // System.out.println("File sz = " + filesz) ;
             // send the file
+            long done = 0 ;
             while (fistream.read(buffer) > 0)
             {
                 DatagramPacket dp = new DatagramPacket(buffer,buffer.length,host,port) ;
                 osock.send(dp) ;
+                done += buffer.length ;
+                System.out.write(bar(filesz,Math.min(done,filesz)).getBytes()) ;
             }
         }
         catch(IOException e)
@@ -68,7 +81,7 @@ public class sender implements Runnable
     void sendFileTcp(String path)
     {
         flag.book() ;
-        System.out.println("Sending file : " + path) ;
+        // System.out.println("Sending file : " + path) ;
         FileInputStream fistream = null ;
         byte[] buffer = new byte[4096];
         try
@@ -78,12 +91,15 @@ public class sender implements Runnable
             long filesz = fistream.getChannel().size() ;
             ostream.writeLong(filesz) ;
             ostream.flush() ;
-            System.out.println("File sz = " + filesz) ;
+            // System.out.println("File sz = " + filesz) ;
             // send the file
+            long done = 0 ;
             while (fistream.read(buffer) > 0)
             {
                 ostream.write(buffer) ;
                 ostream.flush() ;
+                done += buffer.length ;
+                System.out.write(bar(filesz,Math.min(done,filesz)).getBytes()) ;
             }
         }
         catch(IOException e)
@@ -114,7 +130,7 @@ public class sender implements Runnable
                 if(inputline != null && !inputline.isEmpty())
                 {
                     ostream.writeUTF(inputline);
-                    System.out.println("just wrote " + inputline) ;
+                    // System.out.println("just wrote " + inputline) ;
                     ostream.flush();
                     if(inputline.indexOf("Sending") != -1)
                     {
