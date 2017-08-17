@@ -20,15 +20,28 @@ class listner implements Runnable
         }
         new Thread(this,"bob_listener").start() ;
     }
-    void recieveFileTcp(String path,int remaining)
+    void recieveFileTcp(String path)
     {
+        // recieve the length of the file
+        long remaining = 0 ;
+        try
+        {
+            remaining = istream.readLong() ;
+            System.out.println("file of size si " + remaining) ;
+        }
+        catch(IOException e)
+        {
+            System.err.println("Unable to recieve the length of the file " + path) ;
+        }
+
+        // recieve the actual file
         FileOutputStream fostream = null ;
         byte[] buffer = new byte[4096];
         try
         {
             fostream = new FileOutputStream(path);
             int read = 0 ;
-            while((read = istream.read(buffer, 0, Math.min(buffer.length, remaining))) > 0)
+            while((read = istream.read(buffer, 0, (int)Math.min(buffer.length, remaining))) > 0)
             {
                 remaining -= read;
                 fostream.write(buffer, 0, read) ;
@@ -49,7 +62,7 @@ class listner implements Runnable
     }
     public void run()
     {
-        String responseLine ;
+        String responseLine, path, way  ;
         try
         {
             while(true)
@@ -60,7 +73,12 @@ class listner implements Runnable
                     System.out.flush() ;
                     if(responseLine == "quit") break ;
                 }
-
+                if(responseLine.indexOf("Sending")!=-1)
+                {
+                    path = responseLine.split(" ")[1] ;
+                    way = responseLine.split(" ")[2] ;
+                    if(way == "TCP") recieveFileTcp(path) ;
+                }
 
             }
             istream.close() ;
@@ -103,6 +121,11 @@ class sender implements Runnable
         try
         {
             fistream = new FileInputStream(path);
+            // send the size
+            long filesz = fistream.getChannel().size() ;
+            ostream.writeLong(filesz) ;
+            ostream.flush() ;
+            // send the file
             while (fistream.read(buffer) > 0)
             {
                 ostream.write(buffer) ;
@@ -124,7 +147,7 @@ class sender implements Runnable
     }
     public void run()
     {
-        String inputline ;
+        String inputline, path, way ;
         try
         {
             while(true)
@@ -133,12 +156,14 @@ class sender implements Runnable
                 if(inputline == "break") break ;
                 if(inputline != null && !inputline.isEmpty())
                 {
-                    // if(inputline.indexOf("Sending") != -1)
-                    // {
-                    //
-                    // }
                     ostream.writeUTF(inputline);
                     ostream.flush();
+                    if(inputline.indexOf("Sending") != -1)
+                    {
+                        path = inputline.split(" ")[1] ;
+                        way = inputline.split(" ")[2] ;
+                        if(way == "TCP") sendFileTcp(path) ;
+                    }
                 }
             }
             ostream.close() ;
