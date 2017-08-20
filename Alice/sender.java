@@ -31,10 +31,11 @@ public class sender implements Runnable
     String bar(long total, long done)
     {
         int p = (int)((done * 10) / total) ;
-        String ans = "" ;
+        String ans = "[" ;
         for(int i = 1; i <= p ; ++i) ans = ans + "=" ;
         ans += ">" ;
         for(int i = p+1 ; i <= 10 ; ++i) ans += "_" ;
+        ans += "]" + (10*p) + "%" ;
         ans += "\r" ;
         return ans ;
     }
@@ -70,7 +71,7 @@ public class sender implements Runnable
         try
         {
             fistream.close() ;
-            System.out.println("sending of file is now over") ;
+            // System.out.println("sending of file is now over") ;
         }
         catch(IOException e)
         {
@@ -109,7 +110,7 @@ public class sender implements Runnable
         try
         {
             fistream.close() ;
-            System.out.println("sending of file is now over") ;
+            // System.out.println("sending of file is now over") ;
             ostream.flush() ;
         }
         catch(IOException e)
@@ -136,7 +137,7 @@ public class sender implements Runnable
                     {
                         path = inputline.split(" ")[1] ;
                         way = inputline.split(" ")[2] ;
-                        System.out.println(path + " " + way) ;
+                        // System.out.println(path + " " + way) ;
                         if(way.indexOf("TCP")!=-1) sendFileTcp(path) ;
                         if(way.indexOf("UDP")!=-1) sendFileUdp(path) ;
                     }

@@ -27,10 +27,11 @@ public class listner implements Runnable
     String bar(long total, long done)
     {
         int p = (int)((done * 10) / total) ;
-        String ans = "" ;
+        String ans = "[" ;
         for(int i = 1; i <= p ; ++i) ans = ans + "=" ;
         ans += ">" ;
         for(int i = p+1 ; i <= 10 ; ++i) ans += "_" ;
+        ans += "]" + (10*p) + "%" ;
         ans += "\r" ;
         return ans ;
     }
@@ -103,8 +104,10 @@ public class listner implements Runnable
             fostream = new FileOutputStream(path);
             int read = 0 ;
             long filesz = remaining ;
-            while(remaining >0 && (read = istream.read(buffer, 0, (int)Math.min(buffer.length, remaining)))!=-1)
+            while(remaining >0)
             {
+                read = istream.read(buffer) ;
+                read = (int)Math.min((long)buffer.length,remaining) ;
                 remaining -= read;
                 fostream.write(buffer, 0, read) ;
                 System.out.write(bar(filesz,filesz-remaining).getBytes()) ;
@@ -134,7 +137,7 @@ public class listner implements Runnable
             {
                 if((responseLine = istream.readUTF()) != null)
                 {
-                    if(responseLine.isEmpty()) continue ;
+                    // if(responseLine.isEmpty()) continue ;
                     System.out.println("msg >> " + responseLine);
                     System.out.flush() ;
                     if(responseLine == "quit") break ;
