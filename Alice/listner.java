@@ -52,7 +52,7 @@ public class listner implements Runnable
 
         // recieve the actual file
         FileOutputStream fostream = null ;
-        byte[] buffer = new byte[2048] ;
+        byte[] buffer = new byte[1024] ;
         try
         {
             fostream = new FileOutputStream(path);
@@ -108,10 +108,13 @@ public class listner implements Runnable
             {
                 read = istream.read(buffer) ;
                 read = (int)Math.min((long)buffer.length,remaining) ;
+                if(read <= 0) break ;
                 remaining -= read;
                 fostream.write(buffer, 0, read) ;
                 System.out.write(bar(filesz,filesz-remaining).getBytes()) ;
             }
+            System.out.println("") ;
+            System.out.println("remaining = " + remaining) ;
         }
         catch (IOException e)
        {
@@ -125,7 +128,7 @@ public class listner implements Runnable
        {
            System.err.println("Couldn't write to the file " + path) ;
        }
-    //    System.out.println("recieve of file is now complete") ;
+       System.out.println("recieve of file is now complete") ;
        flag.unbook() ;
     }
     public void run()
@@ -135,13 +138,15 @@ public class listner implements Runnable
         {
             while(true)
             {
-                if((responseLine = istream.readUTF()) != null)
-                {
+                System.out.println("Waiting for input") ;
+                responseLine = istream.readUTF() ;
+                // if((responseLine = istream.readUTF()) )
+                // {
                     // if(responseLine.isEmpty()) continue ;
                     System.out.println("msg >> " + responseLine);
                     System.out.flush() ;
                     if(responseLine == "quit") break ;
-                }
+                // }
                 if(responseLine.indexOf("Sending")!=-1)
                 {
                     path = responseLine.split(" ")[1] ;

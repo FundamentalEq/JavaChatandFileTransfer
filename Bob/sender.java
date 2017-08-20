@@ -44,7 +44,7 @@ public class sender implements Runnable
         flag.book() ;
         // System.out.println("Sending file : " + path) ;
         FileInputStream fistream = null ;
-        byte[] buffer = new byte[2048] ;
+        byte[] buffer = new byte[1024] ;
         try
         {
             fistream = new FileInputStream(path);
@@ -84,7 +84,7 @@ public class sender implements Runnable
         flag.book() ;
         // System.out.println("Sending file : " + path) ;
         FileInputStream fistream = null ;
-        byte[] buffer = new byte[4096];
+        byte[] buffer = new byte[1024];
         try
         {
             fistream = new FileInputStream(path);
@@ -110,8 +110,8 @@ public class sender implements Runnable
         try
         {
             fistream.close() ;
-            // System.out.println("sending of file is now over") ;
-            ostream.flush() ;
+            System.out.println("sending of file is now over") ;
+            // ostream.flush() ;
         }
         catch(IOException e)
         {
@@ -131,8 +131,8 @@ public class sender implements Runnable
                 if(inputline != null && !inputline.isEmpty())
                 {
                     ostream.writeUTF(inputline);
-                    // System.out.println("just wrote " + inputline) ;
                     ostream.flush();
+                    System.out.println("just wrote " + inputline) ;
                     if(inputline.indexOf("Sending") != -1)
                     {
                         path = inputline.split(" ")[1] ;
