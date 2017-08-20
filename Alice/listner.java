@@ -24,14 +24,15 @@ public class listner implements Runnable
         }
         new Thread(this,name).start() ;
     }
-    String bar(long total, long done)
+    String bar(String filename, long total, long done)
     {
         int p = (int)((done * 10) / total) ;
-        String ans = "[" ;
+        p = Math.min(p,10) ;
+        String ans = "Receiving : " + filename + " [" ;
         for(int i = 1; i <= p ; ++i) ans = ans + "=" ;
         ans += ">" ;
         for(int i = p+1 ; i <= 10 ; ++i) ans += "_" ;
-        ans += "]" + (10*p) + "%" ;
+        ans += "]" + (10*p) + "%" + "       ";
         ans += "\r" ;
         return ans ;
     }
@@ -63,8 +64,10 @@ public class listner implements Runnable
                 isock.receive(incoming) ;
                 remaining -= incoming.getLength() ;
                 fostream.write(incoming.getData(), 0, incoming.getLength()) ;
-                System.out.write(bar(filesz,filesz-remaining).getBytes()) ;
+                System.out.write(bar(path,filesz,filesz-remaining).getBytes()) ;
             }
+            System.out.println("") ;
+            System.out.write("msg >> ".getBytes()) ;
         }
         catch (IOException e)
        {
@@ -111,10 +114,11 @@ public class listner implements Runnable
                 if(read <= 0) break ;
                 remaining -= read;
                 fostream.write(buffer, 0, read) ;
-                System.out.write(bar(filesz,filesz-remaining).getBytes()) ;
+                System.out.write(bar(path,filesz,filesz-remaining).getBytes()) ;
             }
             System.out.println("") ;
-            System.out.println("remaining = " + remaining) ;
+            System.out.write("msg >> ".getBytes()) ;
+            // System.out.println("remaining = " + remaining) ;
         }
         catch (IOException e)
        {
@@ -128,7 +132,6 @@ public class listner implements Runnable
        {
            System.err.println("Couldn't write to the file " + path) ;
        }
-       System.out.println("recieve of file is now complete") ;
        flag.unbook() ;
     }
     public void run()
@@ -138,15 +141,11 @@ public class listner implements Runnable
         {
             while(true)
             {
-                System.out.println("Waiting for input") ;
                 responseLine = istream.readUTF() ;
-                // if((responseLine = istream.readUTF()) )
-                // {
-                    // if(responseLine.isEmpty()) continue ;
-                    System.out.println("msg >> " + responseLine);
-                    System.out.flush() ;
-                    if(responseLine == "quit") break ;
-                // }
+                System.out.println(responseLine);
+                System.out.flush() ;
+                System.out.write("msg >> ".getBytes()) ;
+                if(responseLine == "quit") break ;
                 if(responseLine.indexOf("Sending")!=-1)
                 {
                     path = responseLine.split(" ")[1] ;
@@ -154,7 +153,6 @@ public class listner implements Runnable
                     if(way.indexOf("TCP")!=-1) recieveFileTcp(path) ;
                     if(way.indexOf("UDP")!=-1) recieveFileUdp(path) ;
                 }
-
             }
             istream.close() ;
         }

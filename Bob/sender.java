@@ -28,10 +28,10 @@ public class sender implements Runnable
         }
         new Thread(this,name).start() ;
     }
-    String bar(long total, long done)
+    String bar(String filename, long total, long done)
     {
         int p = (int)((done * 10) / total) ;
-        String ans = "[" ;
+        String ans = "Transferring : " + filename + " [" ;
         for(int i = 1; i <= p ; ++i) ans = ans + "=" ;
         ans += ">" ;
         for(int i = p+1 ; i <= 10 ; ++i) ans += "_" ;
@@ -61,8 +61,9 @@ public class sender implements Runnable
                 DatagramPacket dp = new DatagramPacket(buffer,buffer.length,host,port) ;
                 osock.send(dp) ;
                 done += buffer.length ;
-                System.out.write(bar(filesz,Math.min(done,filesz)).getBytes()) ;
+                System.out.write(bar(path,filesz,Math.min(done,filesz)).getBytes()) ;
             }
+            System.out.println("") ;
         }
         catch(IOException e)
         {
@@ -100,8 +101,9 @@ public class sender implements Runnable
                 ostream.write(buffer) ;
                 ostream.flush() ;
                 done += buffer.length ;
-                System.out.write(bar(filesz,Math.min(done,filesz)).getBytes()) ;
+                System.out.write(bar(path,filesz,Math.min(done,filesz)).getBytes()) ;
             }
+            System.out.println("") ;
         }
         catch(IOException e)
         {
@@ -110,7 +112,7 @@ public class sender implements Runnable
         try
         {
             fistream.close() ;
-            System.out.println("sending of file is now over") ;
+            // System.out.println("sending of file is now over") ;
             // ostream.flush() ;
         }
         catch(IOException e)
@@ -126,13 +128,14 @@ public class sender implements Runnable
         {
             while(true)
             {
+                System.out.write("msg >> ".getBytes()) ;
                 inputline = keyRead.readLine() ;
                 if(inputline == "break") break ;
                 if(inputline != null && !inputline.isEmpty())
                 {
                     ostream.writeUTF(inputline);
                     ostream.flush();
-                    System.out.println("just wrote " + inputline) ;
+                    // System.out.println("just wrote " + inputline) ;
                     if(inputline.indexOf("Sending") != -1)
                     {
                         path = inputline.split(" ")[1] ;
